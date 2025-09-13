@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo de Productos</title>
+    <style>
+        body { font-family: sans-serif; margin: 0; background-color: #f4f4f4; }
+        .header { background-color: #fff; padding: 20px; text-align: center; border-bottom: 1px solid #ddd; }
+        .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
+        .filters { margin-bottom: 20px; text-align: center; }
+        .filters a { text-decoration: none; background-color: #333; color: white; padding: 10px 15px; border-radius: 5px; margin: 0 5px; }
+        .filters a.clear { background-color: #888; }
+        .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+        .product-card { background-color: #fff; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; }
+        .product-card img { width: 100%; height: 250px; object-fit: cover; }
+        .product-card-content { padding: 15px; }
+        .product-card-content h2 { margin: 0 0 10px; font-size: 1.2em; }
+        .product-card-content p { margin: 0; color: #555; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Nuestro Catálogo</h1>
+    </div>
+
+    <div class="container">
+        <div class="filters">
+            <span>Filtrar por talla:</span>
+            {% for talla in tallas_disponibles %}
+                <a href="?talla={{ talla }}">{{ talla }}</a>
+            {% endfor %}
+            <a href="/" class="clear">Ver Todos</a>
+        </div>
+
+        <div class="gallery">
+            {% for producto in productos %}
+            <div class="product-card">
+                <img src="{{ producto.imagen_principal|default:'https://via.placeholder.com/300' }}" alt="{{ producto.nombre }}">
+                <div class="product-card-content">
+                    <h2>{{ producto.nombre }}</h2>
+                    <p>{{ producto.descripcion }}</p>
+                </div>
+            </div>
+            {% empty %}
+                <p>No hay productos que coincidan con tu búsqueda.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+</body>
+</html>
