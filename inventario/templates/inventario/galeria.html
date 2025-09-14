@@ -4,50 +4,173 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Catálogo de Productos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: sans-serif; margin: 0; background-color: #f4f4f4; }
-        .header { background-color: #fff; padding: 20px; text-align: center; border-bottom: 1px solid #ddd; }
-        .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
-        .filters { margin-bottom: 20px; text-align: center; }
-        .filters a { text-decoration: none; background-color: #333; color: white; padding: 10px 15px; border-radius: 5px; margin: 0 5px; }
-        .filters a.clear { background-color: #888; }
-        .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
-        .product-card { background-color: #fff; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; }
-        .product-card img { width: 100%; height: 250px; object-fit: cover; }
-        .product-card-content { padding: 15px; }
-        .product-card-content h2 { margin: 0 0 10px; font-size: 1.2em; }
-        .product-card-content p { margin: 0; color: #555; }
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --background-color: #f8f9fa;
+            --card-background: #ffffff;
+            --text-color: #212529;
+            --light-text-color: #6c757d;
+            --border-color: #dee2e6;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+        .header {
+            background-color: var(--card-background);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        .header .header-buttons a {
+            display: inline-block;
+            color: white;
+            padding: 0.6rem 1.2rem;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background-color 0.2s;
+            margin-left: 0.5rem;
+        }
+        .header .add-button {
+            background-color: var(--primary-color);
+        }
+        .header .add-button:hover {
+            background-color: #0056b3;
+        }
+        .header .clients-button {
+            background-color: var(--secondary-color);
+        }
+        .header .clients-button:hover {
+            background-color: #5a6268;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        .product-card {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            display: flex;
+            flex-direction: column;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px rgba(0,0,0,0.1);
+        }
+        .product-card img {
+            width: 100%;
+            height: 320px;
+            object-fit: cover;
+            display: block;
+        }
+        .product-card-content {
+            padding: 1rem;
+            flex-grow: 1; /* Permite que el contenido crezca */
+            display: flex;
+            flex-direction: column;
+        }
+        .product-card-content h2 {
+            margin: 0 0 0.5rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        .product-card-content p {
+            margin: 0.25rem 0;
+            color: var(--light-text-color);
+        }
+        .product-card-content .price {
+            font-weight: 700;
+            color: var(--text-color);
+            font-size: 1.1rem;
+            margin-bottom: auto; /* Empuja el botón de vender hacia abajo */
+        }
+        .sell-button {
+            display: block;
+            text-align: center;
+            margin-top: 1rem;
+            padding: 0.6rem;
+            background-color: var(--success-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+        .sell-button:hover {
+            background-color: #218838;
+        }
+        .empty-gallery {
+            text-align: center;
+            padding: 4rem;
+            background-color: var(--card-background);
+            border-radius: 12px;
+            border: 1px dashed var(--border-color);
+        }
+        .empty-gallery h2 {
+            margin-top: 0;
+        }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>Nuestro Catálogo</h1>
-    </div>
-
-    <div class="container">
-        <div class="filters">
-            <span>Filtrar por talla:</span>
-            {% for talla in tallas_disponibles %}
-                <a href="?talla={{ talla }}">{{ talla }}</a>
-            {% endfor %}
-            <a href="/" class="clear">Ver Todos</a>
+    <header class="header">
+        <h1>Mi Catálogo</h1>
+        <div class="header-buttons">
+            <a href="{% url 'historial_ventas' %}" class="clients-button" style="background-color: #17a2b8;">Historial</a>
+            <a href="{% url 'lista_clientes' %}" class="clients-button">Ver Clientes</a>
+            <a href="{% url 'agregar_producto' %}" class="add-button">+ Agregar Producto</a>
         </div>
+        </header>
 
+    <main class="container">
         <div class="gallery">
             {% for producto in productos %}
             <div class="product-card">
-                <img src="{{ producto.imagen_principal|default:'https://via.placeholder.com/300' }}" alt="{{ producto.nombre }}">
+                {% if producto.imagen %}
+                    <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+                {% else %}
+                    <img src="https://via.placeholder.com/320x320.png?text=Sin+Imagen" alt="Imagen no disponible">
+                {% endif %}
                 <div class="product-card-content">
                     <h2>{{ producto.nombre }}</h2>
-                    <p>{{ producto.descripcion }}</p>
-                </div>
+                    <p class="price">${{ producto.precio }}</p>
+                    <p>Talla: {{ producto.talla }}</p>
+                    <a href="{% url 'registrar_venta' producto.id %}" class="sell-button">Vender</a>
+                    </div>
             </div>
             {% empty %}
-                <p>No hay productos que coincidan con tu búsqueda.</p>
+                <div class="empty-gallery">
+                    <h2>Tu catálogo está vacío</h2>
+                    <p>Comienza a construir tu inventario agregando tu primer producto.</p>
+                </div>
             {% endfor %}
         </div>
-    </div>
+    </main>
 
 </body>
 </html>

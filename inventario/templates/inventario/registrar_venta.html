@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Registrar Venta</title>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8f9fa; margin: 0; padding: 2rem; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { display: flex; gap: 2rem; max-width: 800px; width: 100%; }
+        .product-info, .form-container { background: #fff; padding: 2rem; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+        .product-info { flex-basis: 40%; }
+        .form-container { flex-basis: 60%; }
+        .product-info img { width: 100%; border-radius: 8px; }
+        h2, h3 { text-align: center; margin-top: 0; }
+        form p { margin-bottom: 1.25rem; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
+        input, select { width: 100%; padding: 0.75rem; border: 1px solid #dee2e6; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; background-color: #28a745; color: white; padding: 0.8rem; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1rem; font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="product-info">
+            <h3>Producto a Vender</h3>
+            {% if producto.imagen %}
+                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+            {% endif %}
+            <h4>{{ producto.nombre }}</h4>
+            <p><strong>Talla:</strong> {{ producto.talla }}</p>
+            <p><strong>Precio:</strong> ${{ producto.precio }}</p>
+        </div>
+        <div class="form-container">
+            <h2>Asignar Venta</h2>
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit">Confirmar Venta</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

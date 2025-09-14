@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Historial de Ventas</title>
+    <style>
+        body { font-family: 'Inter', sans-serif; margin: 0; background-color: #f8f9fa; }
+        .header { background-color: #fff; padding: 1rem 2rem; border-bottom: 1px solid #dee2e6; display: flex; justify-content: space-between; align-items: center; }
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+        .summary-cards { display: flex; gap: 1.5rem; margin-bottom: 2rem; }
+        .card { background-color: #fff; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); flex-grow: 1; }
+        .card h3 { margin: 0 0 0.5rem; color: #6c757d; }
+        .card p { margin: 0; font-size: 2rem; font-weight: 700; }
+        table { width: 100%; border-collapse: collapse; background-color: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-radius: 12px; overflow: hidden; }
+        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid #dee2e6; }
+        th { background-color: #f8f9fa; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>Historial de Ventas</h1>
+        <a href="{% url 'galeria_productos' %}" style="text-decoration: none; color: #007bff; font-weight: 600;">← Volver al Catálogo</a>
+    </header>
+    <main class="container">
+        <div class="summary-cards">
+            <div class="card">
+                <h3>Ingresos Totales</h3>
+                <p>${{ ingresos_totales }}</p>
+            </div>
+            <div class="card">
+                <h3>Prendas Vendidas</h3>
+                <p>{{ total_ventas }}</p>
+            </div>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Fecha y Hora</th>
+                    <th>Producto Vendido</th>
+                    <th>Vendido a</th>
+                    <th>Método de Pago</th>
+                    <th>Precio</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for venta in ventas %}
+                <tr>
+                    <td>{{ venta.fecha_venta|date:"d/m/Y P" }}</td>
+                    <td>{{ venta.producto_nombre }}</td>
+                    <td>{{ venta.cliente.nombre }}</td>
+                    <td>{{ venta.tipo_pago }}</td>
+                    <td>${{ venta.producto_precio }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align: center;">Aún no hay ventas registradas.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </main>
+</body>
+</html>

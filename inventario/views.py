@@ -1,24 +1,115 @@
-from django.shortcuts import render
-from .models import Producto, Variante
+# inventario/views.py
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.db.models import Sum
+from .models import Producto, Cliente, Venta
+from .forms import ProductoForm, VentaForm
+
+# --- Vistas de Productos ---
 
 def galeria_productos(request):
-    # Obtenemos el parámetro 'talla' de la URL (ej: ?talla=M)
-    talla_filtrada = request.GET.get('talla')
+    """
+    Muestra la galería de todos los productos.
+    """
+    productos = Producto.objects.all()
+    context = {
+        'productos': productos
+    }
+    return render(request, 'inventario/galeria.html', context)
 
-    if talla_filtrada:
-        # Si se filtró por una talla, buscamos los productos que tienen esa variante.
-        # .distinct() asegura que no tengamos productos duplicados en la lista.
-        productos = Producto.objects.filter(variantes__talla=talla_filtrada).distinct()
+
+def agregar_producto(request):
+    """
+    Maneja el formulario para agregar un nuevo producto.
+    """
+    if request.method == 'POST':
+        form = ProductoForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('galeria_productos')
     else:
-        # Si no hay filtro, mostramos todos los productos.
-        productos = Producto.objects.all()
+        form = ProductoForm()
+    
+    return render(request, 'inventario/agregar_producto.html', {'form': form})
 
-    # Obtenemos una lista de todas las tallas únicas disponibles para crear los botones de filtro
-    tallas_disponibles = Variante.objects.values_list('talla', flat=True).distinct()
+
+# --- Vistas de Clientes y Ventas ---
+
+def lista_clientes(request):
+    """
+    Muestra la lista de clientes con sus estadísticas de compra.
+    """
+    clientes = Cliente.objects.annotate(
+        total_gastado=Sum('venta__precio_total'),
+        cantidad_productos=Sum('venta__cantidad')
+    ).order_by('-total_gastado')
 
     context = {
-        'productos': productos,
-        'tallas_disponibles': tallas_disponibles
+        'clientes': clientes
     }
+    return render(request, 'inventario/lista_clientes.html', context)
+
+
+def registrar_venta(request, producto_id):
+    """
+    Maneja el proceso de vender un producto a un cliente.
+    """
+    producto = get_object_or_404(Producto, id=producto_id)
+
+    if request.method == 'POST':
+        form = VentaForm(request.POST)
+        if form.is_valid():
+            cliente_existente = form.cleaned_data.get('cliente_existente')
+            nuevo_cliente_nombre = form.cleaned_data.get('nuevo_cliente_nombre')
+
+            cliente = None
+            if cliente_existente:
+                cliente = cliente_existente
+            elif nuevo_cliente_nombre:
+                cliente, created = Cliente.objects.get_or_create(nombre=nuevo_cliente_nombre)
+            else:
+                form.add_error(None, "Debes seleccionar un cliente existente o ingresar uno nuevo.")
+            
+            if cliente:
+                # 1. Se crea el registro de la venta con los nuevos detalles
+                Venta.objects.create(
+                    producto=producto,
+                    cliente=cliente,
+                    # Copiamos los datos importantes
+                    producto_nombre=producto.nombre,
+                    producto_precio=producto.precio,
+                    # Guardamos el nuevo campo
+                    tipo_pago=form.cleaned_data.get('tipo_pago'),
+                    cantidad=1,
+                )
+                
+                # 2. Se elimina el producto del stock
+                producto.delete()
+                
+                # 3. Se redirige a la galería
+                return redirect('galeria_productos')
+    else:
+        form = VentaForm()
+
+    context = {
+        'form': form,
+        'producto': producto
+    }
+    return render(request, 'inventario/registrar_venta.html', context)
+
+def historial_ventas(request):
+    """
+    Muestra el historial completo de ventas y un resumen.
+    """
+    ventas = Venta.objects.all().order_by('-fecha_venta')
     
-    return render(request, 'inventario/galeria.html', context)
+    # Calculamos los totales
+    total_ventas = ventas.count()
+    ingresos_totales = ventas.aggregate(Sum('producto_precio'))['producto_precio__sum'] or 0
+
+    context = {
+        'ventas': ventas,
+        'total_ventas': total_ventas,
+        'ingresos_totales': ingresos_totales,
+    }
+    return render(request, 'inventario/historial_ventas.html', context)

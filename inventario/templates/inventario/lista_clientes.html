@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Clientes</title>
+    <style>
+        body { font-family: 'Inter', sans-serif; margin: 0; background-color: #f8f9fa; }
+        .header { background-color: #fff; padding: 1rem 2rem; border-bottom: 1px solid #dee2e6; display: flex; justify-content: space-between; align-items: center; }
+        .container { max-width: 1000px; margin: 2rem auto; padding: 0 1rem; }
+        table { width: 100%; border-collapse: collapse; background-color: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-radius: 12px; overflow: hidden; }
+        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid #dee2e6; }
+        th { background-color: #f8f9fa; font-weight: 600; }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background-color: #f1f3f5; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>Clientes</h1>
+        <a href="{% url 'galeria_productos' %}" style="text-decoration: none; color: #007bff; font-weight: 600;">← Volver al Catálogo</a>
+    </header>
+    <main class="container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Nombre del Cliente</th>
+                    <th>Productos Comprados</th>
+                    <th>Total Gastado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cliente in clientes %}
+                <tr>
+                    <td>{{ cliente.nombre }}</td>
+                    <td>{{ cliente.cantidad_productos|default:"0" }}</td>
+                    <td>${{ cliente.total_gastado|default:"0.00" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" style="text-align: center;">Aún no hay clientes registrados.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </main>
+</body>
+</html>
